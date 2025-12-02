@@ -1,0 +1,328 @@
+{
+  "name": "ALOWARE SMS",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "SMS",
+        "options": {}
+      },
+      "id": "8c30651c-c03c-4002-8133-3830e83fae3a",
+      "name": "Webhook Aloware",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -576
+      ],
+      "webhookId": "b7d63d1a-1fe8-49b4-825e-1af918c14f50"
+    },
+    {
+      "parameters": {
+        "resource": "leads",
+        "filter": {
+          "query": "={{ $('Webhook Aloware').item.json.body.body.lead_number }}"
+        },
+        "options": {
+          "with": [
+            "contacts"
+          ]
+        }
+      },
+      "id": "2c4a0396-37ae-432a-bdea-cffa9117c320",
+      "name": "Obtener Leads por Contact ID",
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -576
+      ],
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "058adcd2-9dc9-44bf-8fd9-5d835e9fa852",
+              "leftValue": "={{ $json._embedded.leads[0]._embedded.tags[0].id }}",
+              "rightValue": 246993,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        -576
+      ],
+      "id": "b3fde28f-0817-4f5b-a84c-eef6f9b1f3da",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// items es un array con todos los datos que entran al nodo\nconst data = items.map(i => i.json);\n\nconst aloware = data.find(d => d.body?.body?.contact);\n\n// Si no se encuentra una entrada de Aloware, detenemos la ejecución.\nif (!aloware) {\n  return [{ json: { error: \"No se encontraron datos de Aloware.\" } }];\n}\n\n// --- Lógica para extraer el nombre del AGENTE ---\nconst engagementText = aloware.body?.body?.contact?.last_engagement_text || \"\";\nlet nombreAgente = \"\";\n\n// Usamos una expresión regular para encontrar el texto dentro de los paréntesis.\n// La expresión /\\((.*?)\\)/ busca un \"(\", captura todo lo que hay dentro, y termina en \")\".\nconst match = engagementText.match(/\\((.*?)\\)/);\n\n// Si la expresión regular encontró una coincidencia...\nif (match && match[1]) {\n  // match[1] contiene el texto capturado, por ejemplo: \"Javier Serrano\"\n  nombreAgente = match[1].trim(); \n}\n\n// --- Plan B (Fallback) ---\n// Si no encontramos el nombre en el texto, usamos el email del usuario como alternativa.\nif (!nombreAgente) {\n  nombreAgente = aloware.body?.body?.user_email || \"Agente Desconocido\";\n}\n\n\nreturn [\n  {\n    json: {\n      // Usamos la variable 'nombreAgente' que ahora tiene el nombre correcto\n      nombre: nombreAgente,\n      mensaje: aloware.body.body.body || \"\",\n      telefono: aloware.body.body.contact?.phone_number || \"\",\n      fecha: aloware.body.body.created_at || \"\",\n      tipoSMS: aloware.body.body.direction === 1 ? \"Entrante\" : \"Saliente\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -576
+      ],
+      "id": "0820eb77-183d-4fb7-bb1f-e0fce4c1e379",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "resource": "notes",
+        "operation": "createNotes",
+        "notes": {
+          "common": [
+            {
+              "created_at": "={{ DateTime.now().toUTC() }}",
+              "entity_id": "={{ $json._embedded.leads[0].id }}",
+              "text": "=Aloware mensaje {{ $('Code').item.json.tipoSMS }} de {{ $('Code').item.json.nombre }} : {{ $('Code').item.json.mensaje }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        -576
+      ],
+      "id": "02e75f81-70f3-4e54-888d-b18d93ea20f3",
+      "name": "Kommo API Node5",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook Aloware": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.consulexperience.com",
+            "user-agent": "GuzzleHttp/7",
+            "content-length": "2527",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "34.218.251.12",
+            "cf-ipcountry": "US",
+            "cf-ray": "9890196708089314-PDX",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "104.23.160.187",
+            "x-forwarded-host": "n8n.consulexperience.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "body": {
+              "id": 735559301,
+              "company_id": 7737,
+              "campaign_id": 49556,
+              "ring_group_id": 21280,
+              "owner_id": 100062,
+              "user_id": 100062,
+              "workflow_id": null,
+              "broadcast_id": null,
+              "creator_type": 1,
+              "incoming_number_id": 236741,
+              "incoming_number": "+19152211931",
+              "contact_id": 129225014,
+              "call_disposition_id": null,
+              "lead_number": "+13469469008",
+              "target_users": null,
+              "attempt": null,
+              "attempting_users": null,
+              "destination_number": "",
+              "transfer_prior_user_ids": null,
+              "transfer_target_user_ids": null,
+              "in_cold_transfer": false,
+              "direction": 2,
+              "type": 2,
+              "is_read": true,
+              "voicemail_duration": null,
+              "legc_uuid": null,
+              "legc_status": null,
+              "first_time_caller": 0,
+              "body": "HI",
+              "attachments": null,
+              "current_status2": 13,
+              "disposition_status2": 4,
+              "resolution2": 1,
+              "callback_status": null,
+              "transfer_type": null,
+              "rejected_by_app": 0,
+              "duration": 1,
+              "hold_time": 0,
+              "talk_time": 0,
+              "wait_time": 0,
+              "csat_score": 0,
+              "notes": null,
+              "country": "US",
+              "state": "TX",
+              "city": null,
+              "engagement_data": [],
+              "created_at": "2025-10-03 23:07:56",
+              "updated_at": "2025-10-03 23:07:58",
+              "has_recording": false,
+              "has_voicemail": false,
+              "is_introduce": false,
+              "added_user_id": null,
+              "added_user": null,
+              "last_call_source": null,
+              "has_transcription": false,
+              "transcription_is_deleted": false,
+              "recording_is_deleted": false,
+              "public_metadata": [],
+              "call_transcription_status": null,
+              "call_summary": null,
+              "call_summary_status": null,
+              "is_eligible_for_transcribe": false,
+              "contact": {
+                "id": 129225014,
+                "company_id": 7737,
+                "user_id": 100062,
+                "initial_campaign_id": 50254,
+                "disposition_status_id": null,
+                "lead_source_id": null,
+                "intake_source": "click-to-call",
+                "phone_number": "+13469469008",
+                "company_name": null,
+                "email": null,
+                "first_name": null,
+                "last_name": null,
+                "timezone": "America/Chicago",
+                "external_data": null,
+                "csf1": null,
+                "csf2": null,
+                "unread_count": 0,
+                "cnam_source": null,
+                "cnam_city": null,
+                "cnam_state": "TX",
+                "cnam_zipcode": null,
+                "cnam_country": "US",
+                "address": null,
+                "website": null,
+                "notes": null,
+                "date_of_birth": null,
+                "last_engagement_at": "2025-10-03 23:07:56",
+                "last_engagement_text": "↗ (Javier Serrano) HI.",
+                "nb_communications": 9,
+                "inbound_call_count": 0,
+                "outbound_call_count": 7,
+                "inbound_sms_count": 0,
+                "outbound_sms_count": 2,
+                "unread_voicemail_count": 0,
+                "unread_missed_call_count": 0,
+                "lrn_type": 1,
+                "is_blocked": false,
+                "is_dnc": false,
+                "uuid_v4": "eb37c1b9-51fe-4093-a574-430b64697de7",
+                "text_authorized": 0,
+                "text_authorized_at": null,
+                "created_at": "2025-08-14 21:44:22",
+                "updated_at": "2025-10-03 23:07:56",
+                "name": "",
+                "lead_source": "",
+                "integration_data": null,
+                "custom_link": null,
+                "workflow_id": null,
+                "sequence_id": null,
+                "disposition_status": null
+              },
+              "user_email": "info@consulexperience.com"
+            },
+            "event": "OutboundSMS"
+          },
+          "webhookUrl": "https://n8n.consulexperience.com/webhook/SMS",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook Aloware": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Leads por Contact ID": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Kommo API Node5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Obtener Leads por Contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "08dc981b-b3ee-4180-accb-74d2dcb3d49d",
+  "meta": {
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "rAxFMe6jWf80S4BU",
+  "tags": []
+}

@@ -1,0 +1,761 @@
+{
+  "name": "Meta ADS",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "99e001d7-47f9-48d0-b86a-a7a099f98eb0",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v23.0",
+        "node": "act_1071502190517155",
+        "edge": "campaigns",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "fields",
+                "value": "id,status"
+              },
+              {
+                "name": "limit",
+                "value": "20"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "ef9081bd-ac7f-4082-9b79-f9c81719720e",
+      "name": "Facebook Graph API",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "ZvOpbp8wU0OrYFxT",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=data",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -64
+      ],
+      "id": "459692ee-88f2-41e8-81fa-33cc8ac4c41f",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b3a8d524-78e1-4df2-af0c-175d761cf57f",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "ACTIVE",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -64
+      ],
+      "id": "35af85d4-37f8-457b-8c7f-fe32e17b1891",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.data.id }}",
+        "edge": "adsets",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "fields",
+                "value": "id,name,daily_budget,effective_status"
+              },
+              {
+                "name": "limit",
+                "value": "200"
+              },
+              {
+                "name": "filtering",
+                "value": "={{ JSON.stringify([{field:'effective_status', operator:'IN', value:['ACTIVE', 'PAUSED', 'CAMPAIGN_PAUSED', 'ARCHIVED', 'IN_PROCESS', 'WITH_ISSUES']}]) }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -64
+      ],
+      "id": "d2038efc-abc0-4a86-bbf6-4ee0990528ca",
+      "name": "Facebook Graph API1",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "ZvOpbp8wU0OrYFxT",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.id }}",
+        "edge": "insights",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "fields",
+                "value": "account_currency,account_id,account_name,action_values,actions,ad_id,ad_name,adset_id,adset_name,buying_type,campaign_id,campaign_name,canvas_avg_view_percent,canvas_avg_view_time,clicks,conversion_rate_ranking,conversion_values,conversions,converted_product_quantity,converted_product_value,cost_per_action_type,cost_per_conversion,cost_per_estimated_ad_recallers,cost_per_inline_link_click,cost_per_inline_post_engagement,cost_per_outbound_click,cost_per_thruplay,cost_per_unique_action_type,cost_per_unique_click,cost_per_unique_inline_link_click,cost_per_unique_outbound_click,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,engagement_rate_ranking,estimated_ad_recall_rate,estimated_ad_recallers,frequency,full_view_impressions,full_view_reach,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,instagram_upcoming_event_reminders_set,instant_experience_clicks_to_open,instant_experience_clicks_to_start,instant_experience_outbound_clicks,mobile_app_purchase_roas,objective,optimization_goal,outbound_clicks,outbound_clicks_ctr,purchase_roas,qualifying_question_qualify_answer_rate,quality_ranking,reach,social_spend,spend,unique_actions,unique_clicks,unique_ctr,unique_inline_link_click_ctr,unique_inline_link_clicks,unique_link_clicks_ctr,unique_outbound_clicks,unique_outbound_clicks_ctr,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,video_play_curve_actions,video_thruplay_watched_actions,website_ctr,website_purchase_roas"
+              },
+              {
+                "name": "limit",
+                "value": "1000"
+              },
+              {
+                "name": "time_increment",
+                "value": "1"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        -64
+      ],
+      "id": "5cf48c1a-58fa-4ea8-b931-3c49a42efefb",
+      "name": "Facebook Graph API2",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "ZvOpbp8wU0OrYFxT",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "/*\n* n8n Code Node: Prepare Facebook Ads Data for Google Sheets\n* -----------------------------------------------------------\n* Instructions:\n* 1. Connect this node AFTER the 'Facebook Graph API' node that gets the 'insights'.\n* 2. IMPORTANT: Adjust the node name '$('itemlist')' below if the node\n* that provides the individual Ad Set details (ID, name, status, budget)\n* has a different name in your workflow.\n* 3. This code assumes the insights data arrives with the structure:\n* `{ \"data\": [{ ...insights... }] }`\n* and the Ad Set data from the previous node has fields like 'id', 'name',\n* 'effective_status', 'daily_budget'.\n*/\n\n// --- Access Data from Previous Nodes ---\n\n// Get the main insights object (usually the first element in the 'data' array)\nconst insights = $json.data?.[0];\n\n// Get the Ad Set details from the node that split them out (ADJUST NAME IF NEEDED)\nconst adSetNodeName = 'itemlist'; // <--- This should match your node name\nconst adSet = $(adSetNodeName).item.json;\n\n// Initialize an empty object for the output data\nlet outputData = {};\n\n// --- Check if we have essential data ---\nif (!insights || !adSet) {\n  console.error(\"Missing insights or Ad Set data. Check previous nodes.\");\n  // Return an empty object or throw an error if you want the workflow to stop\n  return { error: \"Missing input data\" };\n}\n\n// --- Helper function to safely get action values ---\nconst getActionValue = (actionsArray, actionType) => {\n  if (!Array.isArray(actionsArray)) {\n    return 0; // Return 0 if actionsArray is not an array\n  }\n  const action = actionsArray.find(a => a.action_type === actionType);\n  // Return the numeric value or 0 if not found or value is not numeric\n  return action ? parseFloat(action.value) || 0 : 0;\n};\n\n// --- Prepare Variables ---\n\n// ***********************************************\n// --- NUEVA LÍNEA: Fecha y Hora de Ejecución ---\noutputData['FECHA_HORA'] = DateTime.now().setZone('America/New_York').toFormat('yyyy-MM-dd HH:mm:ss');\n// ***********************************************\n\n// IDs and Names\noutputData['01 Nombre Campaña'] = insights.campaign_name || 'N/A'; // Get campaign name from insights\noutputData['02 Conjunto'] = adSet.name || 'N/A';\noutputData['--03 Status'] = adSet.effective_status || 'N/A';\n\n// Placeholders (Fill these manually in Sheets or modify code if needed)\noutputData['--04 CTA'] = 'Ingresa CTA';\noutputData['--05 Fase Test'] = 'Ingresa Fase Test';\noutputData['--06 Publico'] = 'Ingresa Publico';\noutputData['--07 Publico Especial'] = 'Ingresa Publico Especial';\noutputData['--08 Business Goal'] = 'Ingresa Business Goal';\n\n// Campaign/Ad Set Goals\noutputData['09 Objetivo FB'] = insights.objective || 'N/A';\noutputData['10 Optimizacion Goal'] = insights.optimization_goal || 'N/A';\n\n// Placeholders\noutputData['--11 Creativo'] = 'Ingresa Creativo';\noutputData['--12 Angulo Copy'] = 'Ingresa Angulo Copy';\n\n// Core Metrics\noutputData['13 Invertido'] = parseFloat(insights.spend || 0);\noutputData['16 Impresiones'] = parseInt(insights.impressions || 0);\noutputData['17 CPM'] = parseFloat(insights.cpm || 0);\noutputData['18 Alcance'] = parseInt(insights.reach || 0);\noutputData['19 Frecuencia'] = parseFloat(insights.frequency || 0);\noutputData['20 Clicks All'] = parseInt(insights.clicks || 0);\n\n// Action Metrics (using helper function for safety)\noutputData['21 Post Engagement'] = getActionValue(insights.actions, 'post_engagement');\noutputData['22 Post Reactions'] = getActionValue(insights.actions, 'post_reaction');\noutputData['23 Guardados'] = getActionValue(insights.actions, 'onsite_conversion.post_save');\noutputData['24 Compartidos'] = getActionValue(insights.actions, 'post');\n\n// Calculated Metrics\noutputData['25 CTR ALL'] = (parseFloat(insights.ctr || 0)) / 100;\n\n// Video Metrics (using helper function)\noutputData['26 ThruPlays'] = getActionValue(insights.video_thruplay_watched_actions, 'video_view');\noutputData['27 Video plays 25%'] = getActionValue(insights.video_p25_watched_actions, 'video_view');\noutputData['28 Video plays 75%'] = getActionValue(insights.video_p75_watched_actions, 'video_view');\n\n// Link Clicks\noutputData['29 Link clicks'] = parseInt(insights.inline_link_clicks || 0);\n\n// Dates (using Luxon via n8n's DateTime object)\noutputData['30 Start date'] = insights.date_start ? DateTime.fromISO(insights.date_start).toFormat('MM/dd/yy') : '';\noutputData['31 End date'] = insights.date_stop ? DateTime.fromISO(insights.date_stop).toFormat('MM/dd/yy') : '';\n\n// Budget (from Ad Set data)\noutputData['Ptto Diario/Mensual'] = parseFloat(adSet.daily_budget || 0);\n\n// --- Calculated Results (based on Optimization Goal) ---\nlet resultadoValor = 'DEFINIR1';\nconst goal = outputData['10 Optimizacion Goal'];\n\nif (goal === 'THRUPLAY') {\n  resultadoValor = outputData['26 ThruPlays'];\n} else if (goal === 'REACH') {\n  resultadoValor = outputData['18 Alcance'];\n} else if (goal === 'PROFILE_VISIT' || goal === 'VISIT_INSTAGRAM_PROFILE') {\n  resultadoValor = outputData['20 Clicks All'];\n}\n// Add more 'else if' conditions here if needed for other goals like 'LINK_CLICKS', etc.\n// else if (goal === 'LINK_CLICKS') {\n//   resultadoValor = outputData['29 Link clicks'];\n// }\n\noutputData['RESULTADO'] = resultadoValor;\n\n// --- Calculated Cost Per Result ---\nlet costoPorResultado = 'DEFINIR1'; // Default\nconst resultadoNum = parseFloat(outputData.RESULTADO); // Use already calculated RESULTADO\nconst invertidoNum = outputData['13 Invertido']; // Already a number\n\n// Check for valid numbers and avoid division by zero\nif (typeof resultadoNum === 'number' && !isNaN(resultadoNum) && typeof invertidoNum === 'number' && !isNaN(invertidoNum)) {\n  if (resultadoNum !== 0) {\n    if (goal === 'REACH') {\n      // Use CPM directly if available, otherwise calculate\n      costoPorResultado = outputData['17 CPM'] !== 0 ? outputData['17 CPM'] : (invertidoNum * 1000) / resultadoNum;\n    } else if (goal === 'THRUPLAY' || goal === 'PROFILE_VISIT' || goal === 'VISIT_INSTAGRAM_PROFILE') {\n      costoPorResultado = invertidoNum / resultadoNum;\n    }\n    // Ensure the final cost is a number or keep 'DEFINIR1'\n     costoPorResultado = isNaN(parseFloat(costoPorResultado)) ? 'ErrorCalc' : parseFloat(costoPorResultado);\n  } else if (invertidoNum > 0) {\n    costoPorResultado = 'Inf'; // Indicate infinite cost if spend > 0 but results = 0\n  } else {\n    costoPorResultado = 0; // Cost is 0 if both spend and results are 0\n  }\n} else {\n   costoPorResultado = 0; // If RESULTADO wasn't a valid number ('DEFINIR1') or spend invalid.\n}\n\n\noutputData['COSTO X RESULTADO'] = costoPorResultado;\n\n// --- Return the final object ---\n// This object will be the output of the Code node, ready for Google Sheets\nreturn outputData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -64
+      ],
+      "id": "8a826c70-1da9-443e-aa14-ee7eed055d06",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -64
+      ],
+      "id": "32f6e050-f3a3-418a-8079-23783179da29",
+      "name": "itemlist"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1m-KPlFi1HkJg0B20wRXbPkhN76YzM9NPRdaIBxgckIc",
+          "mode": "list",
+          "cachedResultName": "Meta Ads Metricas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1m-KPlFi1HkJg0B20wRXbPkhN76YzM9NPRdaIBxgckIc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fo8NYKr3G7tsnonFQUpoOUsKHTzEdUTi0K0LKsvGAUk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "01 Nombre Campaña": "={{ $json[\"01 Nombre Campaña\"] }}",
+            "02 Conjunto": "={{ $json[\"02 Conjunto\"] }}",
+            "--03 Status": "={{ $json[\"--03 Status\"] }}",
+            "--04 CTA": "={{ $json['--04 CTA'] }}",
+            "--05 Fase Test": "={{ $json['--06 Publico'] }}",
+            "--06 Publico": "={{ $json['--08 Business Goal'] }}",
+            "--07 Publico Especial": "={{ $json['--07 Publico Especial'] }}",
+            "--08 Business Goal": "={{ $json['--08 Business Goal'] }}",
+            "09 Objetivo FB": "={{ $json['09 Objetivo FB'] }}",
+            "10 Optimizacion Goal": "={{ $json['10 Optimizacion Goal'] }}",
+            "--11 Creativo": "={{ $json['--11 Creativo'] }}",
+            "--12 Angulo Copy": "={{ $json['--12 Angulo Copy'] }}",
+            "13 Invertido": "={{ $json['13 Invertido'] }}",
+            "16 Impresiones": "={{ $json['16 Impresiones'] }}",
+            "17 CPM": "={{ $json['17 CPM'] }}",
+            "18 Alcance": "={{ $json['18 Alcance'] }}",
+            "19 Frecuencia": "={{ $json['19 Frecuencia'] }}",
+            "20 Clicks All": "={{ $json['20 Clicks All'] }}",
+            "21 Post Engagement": "={{ $json['21 Post Engagement'] }}",
+            "22 Post Reactions": "={{ $json['22 Post Reactions'] }}",
+            "23 Guardados": "={{ $json['23 Guardados'] }}",
+            "24 Compartidos": "={{ $json['24 Compartidos'] }}",
+            "25 CTR ALL": "={{ $json['25 CTR ALL'] }}",
+            "26 ThruPlays": "={{ $json['26 ThruPlays'] }}",
+            "27 Video plays 25%": "={{ $json['27 Video plays 25%'] }}",
+            "28 Video plays 75%": "={{ $json['28 Video plays 75%'] }}",
+            "29 Link clicks": "={{ $json['29 Link clicks'] }}",
+            "30 Start date": "={{ $json['30 Start date'] }}",
+            "31 End date": "={{ $json['31 End date'] }}",
+            "Ptto Diario/Mensual": "={{ $json['Ptto Diario/Mensual'] }}",
+            "RESULTADO": "={{ $json.RESULTADO }}",
+            "COSTO X RESULTADO": "={{ $json['COSTO X RESULTADO'] }}",
+            "Fecha de Ejecucion": "={{ $json.FECHA_HORA }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha de Ejecucion",
+              "displayName": "Fecha de Ejecucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "01 Nombre Campaña",
+              "displayName": "01 Nombre Campaña",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "02 Conjunto",
+              "displayName": "02 Conjunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--03 Status",
+              "displayName": "--03 Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--04 CTA",
+              "displayName": "--04 CTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--05 Fase Test",
+              "displayName": "--05 Fase Test",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--06 Publico",
+              "displayName": "--06 Publico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--07 Publico Especial",
+              "displayName": "--07 Publico Especial",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--08 Business Goal",
+              "displayName": "--08 Business Goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "09 Objetivo FB",
+              "displayName": "09 Objetivo FB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "10 Optimizacion Goal",
+              "displayName": "10 Optimizacion Goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--11 Creativo",
+              "displayName": "--11 Creativo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "--12 Angulo Copy",
+              "displayName": "--12 Angulo Copy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "13 Invertido",
+              "displayName": "13 Invertido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "16 Impresiones",
+              "displayName": "16 Impresiones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "17 CPM",
+              "displayName": "17 CPM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "18 Alcance",
+              "displayName": "18 Alcance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "19 Frecuencia",
+              "displayName": "19 Frecuencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "20 Clicks All",
+              "displayName": "20 Clicks All",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "21 Post Engagement",
+              "displayName": "21 Post Engagement",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "22 Post Reactions",
+              "displayName": "22 Post Reactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "23 Guardados",
+              "displayName": "23 Guardados",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "24 Compartidos",
+              "displayName": "24 Compartidos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "25 CTR ALL",
+              "displayName": "25 CTR ALL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "26 ThruPlays",
+              "displayName": "26 ThruPlays",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "27 Video plays 25%",
+              "displayName": "27 Video plays 25%",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "28 Video plays 75%",
+              "displayName": "28 Video plays 75%",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "29 Link clicks",
+              "displayName": "29 Link clicks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "30 Start date",
+              "displayName": "30 Start date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "31 End date",
+              "displayName": "31 End date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ptto Diario/Mensual",
+              "displayName": "Ptto Diario/Mensual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "RESULTADO",
+              "displayName": "RESULTADO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "COSTO X RESULTADO",
+              "displayName": "COSTO X RESULTADO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2016,
+        -64
+      ],
+      "id": "0904ec2b-77ac-4de6-8438-5bd44c3cd3c2",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Vtbp71c7pw69dgyR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f7b1e901-f34b-4f41-8589-cfce3ae897d4",
+              "leftValue": "={{ $json.effective_status }}",
+              "rightValue": "ACTIVE",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        -64
+      ],
+      "id": "88a7f4c0-ed1a-4114-bb15-fb4c08c90e8b",
+      "name": "Filter1"
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-10-30T07:00:50.008+01:00",
+          "Readable date": "October 30th 2025, 7:00:50 am",
+          "Readable time": "7:00:50 am",
+          "Day of week": "Thursday",
+          "Year": "2025",
+          "Month": "October",
+          "Day of month": "30",
+          "Hour": "07",
+          "Minute": "00",
+          "Second": "50",
+          "Timezone": "Europe/Berlin (UTC+01:00)"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API1": {
+      "main": [
+        [
+          {
+            "node": "itemlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API2": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "itemlist": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "DfJ2Aj193aPTVabu",
+    "timezone": "America/New_York"
+  },
+  "versionId": "86907f6e-30d3-4953-9b57-1e4a32dffb72",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "bEbeIwZ4MgycVJFE",
+  "tags": []
+}

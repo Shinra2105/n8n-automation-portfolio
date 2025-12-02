@@ -1,0 +1,628 @@
+{
+  "name": "web",
+  "nodes": [
+    {
+      "parameters": {
+        "resume": "webhook",
+        "responseMode": "responseNode",
+        "options": {
+          "webhookSuffix": "respuesta"
+        }
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        48
+      ],
+      "id": "2a73987d-8db7-47a4-9f9f-907ef2470d10",
+      "name": "Wait",
+      "webhookId": "a30bea8c-bd45-4fbb-9864-315e4e55a312"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        288,
+        592
+      ],
+      "id": "4c00e16d-6fc9-4238-b6c7-f68af3db744e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "data0",
+        "width": 1024,
+        "height": 1024,
+        "resizeOption": "ignoreAspectRatio",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        64,
+        688
+      ],
+      "id": "976ac579-8b82-472b-9755-e222f0906638",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhookimagenes",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        592
+      ],
+      "id": "023cfda7-bee7-4336-9ea3-b685459985b4",
+      "name": "Webhook",
+      "webhookId": "054da78f-6a4e-4b8f-a043-3fd7874705cf"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -160,
+        272
+      ],
+      "id": "dbc5db93-5cba-4caa-aef8-dc930cd75bcd",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.replicate.com/v1/models/google/nano-banana/predictions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "wait"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"input\": {\n    // PROMPT: Lee la variable limpia que creamos en el nodo Code\n    \"prompt\": $json.prompt_final,\n    \n    // IMAGEN: Lee la URL limpia y es ARRAY (tal como pide el modelo en tu ejemplo cURL)\n    \"image_input\": [ $json.image_url_cleaned ],\n    \n    // Parámetros por defecto (se pueden ajustar si el modelo los acepta, pero mejor simplificarlos)\n    \"num_inference_steps\": 30\n  }\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1408,
+        592
+      ],
+      "id": "65c7ded4-7fcd-4d3a-a732-08d3595c9676",
+      "name": "HTTP Request3",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hzTVUvexFO4OXQEh",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "path": "=/img_{{ $execution.id }}.png",
+        "binaryData": true,
+        "binaryPropertyName": "data0"
+      },
+      "type": "n8n-nodes-base.dropbox",
+      "typeVersion": 1,
+      "position": [
+        512,
+        592
+      ],
+      "id": "c1504637-8012-462b-974e-7a9c60904425",
+      "name": "Upload a file",
+      "credentials": {
+        "dropboxOAuth2Api": {
+          "id": "9zMBJdYsnaeuSL43",
+          "name": "Dropbox account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// === CONFIGURACIÓN DE NOMBRES (Flujo Web) ===\n// Asegúrate de que estos nombres coincidan EXACTAMENTE con tus nodos\nconst WEBHOOK_NODE = 'Webhook';       // El nodo que recibe los datos de la web\nconst DROPLINK_NODE = 'enlace';       // El nodo que crea el link de Dropbox\nconst GEMINI_NODE = 'Analyze an image'; \nconst NANO_VERSION = 'a2288278f33d37748b094149219067e238c74209938621222263467034296435'; \n\ntry {\n    // 1. RECUPERAR ESTILO (Directamente del formulario Web)\n    // No buscamos en Telegram, solo en el cuerpo del Webhook\n    const webhookItems = $items(WEBHOOK_NODE);\n    let estilo = 'dibujo'; // Valor por defecto\n\n    if (webhookItems.length > 0 && webhookItems[0].json.body && webhookItems[0].json.body.estilo) {\n        estilo = webhookItems[0].json.body.estilo;\n    }\n\n    // 2. RECUPERAR DESCRIPCIÓN DE GEMINI\n    // Esto asegura que la IA sepa si eres hombre/mujer/tienes barba\n    let descriptionClean = \"a person looking at the camera\"; \n    try {\n        const geminiItems = $items(GEMINI_NODE);\n        if (geminiItems.length > 0 && geminiItems[0].json.content) {\n             descriptionClean = geminiItems[0].json.content.parts[0].text.replace(/(\\r\\n|\\n|\\r)/gm, \" \");\n        }\n    } catch (e) {\n        // Si Gemini no está conectado o falla, usamos la descripción genérica y seguimos\n        console.warn(\"Gemini no disponible, usando descripción por defecto.\");\n    }\n\n    // 3. RECUPERAR URL DE DROPBOX\n    const dropboxItems = $items(DROPLINK_NODE);\n    \n    if (dropboxItems.length === 0) {\n         throw new Error(\"El nodo 'enlace' (Dropbox) no se ejecutó.\");\n    }\n    \n    // Lógica para extraer la URL (soporta .url o .links[0].url)\n    const dbJson = dropboxItems[0].json;\n    let rawUrl = dbJson.url || (dbJson.links && dbJson.links[0] ? dbJson.links[0].url : null);\n\n    if (!rawUrl) throw new Error(\"Dropbox no devolvió una URL válida.\");\n    \n    // Limpieza para descarga directa (Vital para Replicate)\n    const cleanLink = rawUrl.replace(\"www.dropbox.com\", \"dl.dropboxusercontent.com\").replace(\"?dl=0\", \"\");\n\n\n    // 4. LÓGICA DE ESTILOS (Tus 5 estilos optimizados)\n    let promptStyle = \"\";\n    let promptPrefix = \"A character portrait of \"; \n\n    if (estilo == 'simpson') {\n        // Estilo Simpson \"Vintage\"\n        promptStyle = \"VISUAL STYLE: Vintage 90s The Simpsons TV aesthetic. Skin color #FFD90F. Flat 2D coloring, thick shaky black outlines, no shading, no gradients. Matt Groening style. Preserve facial features and expression.\";\n    \n    } else if (estilo == 'lego') {\n        // Estilo Lego\n        promptPrefix = \"A macro photography shot of a LEGO minifigure resembling \";\n        promptStyle = \"VISUAL STYLE: 3D Lego render. Glossy plastic texture, blocky articulation, c-shaped hands. High quality studio lighting, depth of field, octane render. The face features are painted on the plastic cylinder head.\";\n    \n    } else if (estilo == 'stranger') {\n        // Estilo Stranger Things (Póster)\n        promptPrefix = \"An official movie poster-style illustration of the subject as a character from Stranger Things, \";\n        promptStyle = \"VISUAL STYLE: Hyper-detailed 1980s dark fantasy digital painting, official Stranger Things poster aesthetic. The background is The Upside Down with glowing red lightning, tendrils, and a dark, eerie landscape. Intense chiaroscuro lighting in deep reds and blues, heavy VHS film grain, smoke, and particles.\";\n    \n    } else if (estilo == 'espartano') {\n        // Estilo Espartano (Cara visible)\n        promptPrefix = \"An epic cinematic shot of a Spartan warrior, \";\n        promptStyle = \"VISUAL STYLE: Movie '300' aesthetic. Wearing a weathered bronze Corinthian helmet pushed back to reveal face, red cape, holding a spear. Intense contrast, desaturated colors with high contrast gold and crimson, sweaty skin, battlefield background.\";\n    \n    } else if (estilo == 'dibujo') {\n        // Estilo Dibujo\n        promptStyle = \"VISUAL STYLE: Rough charcoal pencil sketch on white paper, artistic, high contrast, messy lines.\";\n    } else {\n        // Fallback\n        promptStyle = \"VISUAL STYLE: Cinematic cyberpunk portrait, neon lighting.\";\n    }\n\n    const finalPrompt = `${promptPrefix} ${descriptionClean}. ${promptStyle}. Preserve identity.`;\n\n    // 5. RETORNO\n    return [{\n        json: {\n            prompt_final: finalPrompt,\n            image_url_cleaned: cleanLink,\n            nano_version: NANO_VERSION\n        },\n        // Importante: Pasamos el binario por si se necesita más adelante\n        binary: $input.item.binary \n    }];\n\n} catch (e) {\n    throw new Error(`ERROR EN FLUJO WEB: ${e.message}`);\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        592
+      ],
+      "id": "c3262d7e-51e2-4c1b-8bae-ca4c5e103f37",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "dropboxApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"path\": \"{{ $json.path_lower }}\",\n    \"settings\": {\n        \"requested_visibility\": \"public\"\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        960,
+        592
+      ],
+      "id": "2b6f7a1c-f6ca-43ec-9cf5-275adf4d28cd",
+      "name": "enlace",
+      "credentials": {
+        "dropboxOAuth2Api": {
+          "id": "9zMBJdYsnaeuSL43",
+          "name": "Dropbox account"
+        },
+        "dropboxApi": {
+          "id": "xQCou062Ki9NEilG",
+          "name": "Dropbox account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "delete",
+        "path": "={{ $('Upload a file').item.json.path_lower }}"
+      },
+      "type": "n8n-nodes-base.dropbox",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        560
+      ],
+      "id": "6e142002-76f9-4492-8429-9315e33107ae",
+      "name": "Delete a file",
+      "credentials": {
+        "dropboxOAuth2Api": {
+          "id": "9zMBJdYsnaeuSL43",
+          "name": "Dropbox account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "Actúa como un sistema de escaneo biométrico avanzado y retratista. Tu objetivo es generar una descripción física en INGLÉS para reconstruir la identidad del sujeto.\n\nAnaliza la imagen y describe de forma concisa y objetiva los siguientes puntos:\n1. **GÉNERO Y EDAD:** Género y edad aparente.\n2. **PEINADO Y TEXTURA:** Color, textura (curly, wavy, straight) y estilo de cabello.\n3. **CABEZA Y ACCESORIOS (VITAL):** ¿Lleva gorra, sombrero o casco? (Ej: \"Wearing a baseball cap\").\n4. **ESTADO DEL CABELLO:** - Si lleva gorra: ¿Se ve cabello saliendo por los lados/atrás? Si NO se ve cabello, escribe: \"**BALD/SHAVED under cap, no visible hair**.\n - Si no lleva gorra: Describe el cabello o calvicie.\n5. **MIRADA Y EXPRESIÓN (CRÍTICO):** Dirección de la mirada (Ej: \"Looking straight into camera lens\"), y descripción de la expresión (Ej: \"Wide smile showing all teeth\" o \"Serious neutral expression\").\n6. **RASGOS FACIALES:** Forma del rostro, nariz, y accesorios (gafas, lentes, etc.).\n7. **VELLO FACIAL (ESTRICTO):** Si la piel está limpia, escribe **\"CLEAN SHAVEN\"**. Si hay barba, descríbela.\n8. **ATUENDO:** Describe la prenda superior y accesorios visibles (lanyard, collar, etc.).\n9.**CUIDADO** Si es mujer NO DEBE TENER BARBA JAMAS\nResponde ÚNICAMENTE con la descripción física y de pose, separada por comas, sin introducciones ni frases complejas.",
+        "inputType": "binary",
+        "binaryPropertyName": "data0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        496
+      ],
+      "id": "5829790b-1897-4f4c-9066-ced7c24abeda",
+      "name": "Analyze an image1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JApLaRYaUT8MAS6f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        736,
+        592
+      ],
+      "id": "7f82b697-eab5-4643-b2b3-89b93bd90204",
+      "name": "Wait1",
+      "webhookId": "1c7e4568-91e6-4898-a03f-615b8c7ce96d"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"imagen_url\": \"{{ $('HTTP Request3').item.json.output }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2064,
+        592
+      ],
+      "id": "1a8ae0b2-02f6-40be-9a88-547a2363cac3",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.email }}",
+        "subject": "HOLA TU CARICATURA ESTA LISTA BY LANCEROSX",
+        "message": "Puedes descargar aqui tu imagen",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1840,
+        592
+      ],
+      "id": "bce566ae-9c21-4ef8-879d-188f3aba5b98",
+      "name": "Send a message",
+      "webhookId": "8e29b10e-151b-4675-92f2-2084508c1a53",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7BfxYkWWRXVZKgi4",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1616,
+        592
+      ],
+      "id": "a8b35d09-5bb0-400c-a513-0c8bc8ee05ef",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1KG7wrxOThqmJSlO8xO0nqx51QsefKLay65GPs-efCSk",
+          "mode": "list",
+          "cachedResultName": "DATA RECOLECTADA POR AI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KG7wrxOThqmJSlO8xO0nqx51QsefKLay65GPs-efCSk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KG7wrxOThqmJSlO8xO0nqx51QsefKLay65GPs-efCSk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TELEFONO ": "={{ $json.body.phone }}",
+            "CORREO ": "={{ $json.body.email }}",
+            "IMAGEN": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "TELEFONO ",
+              "displayName": "TELEFONO ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CORREO ",
+              "displayName": "CORREO ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "IMAGEN",
+              "displayName": "IMAGEN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        320
+      ],
+      "id": "cb867c43-36c9-40db-b95c-910cdbf9223b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EDUWJ1Dw1IRlxvQd",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "gabito22.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Mobile Safari/537.36",
+            "content-length": "45944",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "es-VE,es-ES;q=0.9,es-419;q=0.8,es;q=0.7",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "2a02:6ea0:c041:2231::14",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "NL",
+            "cf-ray": "9a75000970420bbf-AMS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "multipart/form-data; boundary=----WebKitFormBoundary0W5sUChDfmpEZooq",
+            "origin": "https://radiant-valkyrie-23ed69.netlify.app",
+            "priority": "u=1, i",
+            "referer": "https://radiant-valkyrie-23ed69.netlify.app/",
+            "sec-ch-ua": "\"Chromium\";v=\"142\", \"Google Chrome\";v=\"142\", \"Not_A Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?1",
+            "sec-ch-ua-platform": "\"Android\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "2a02:6ea0:c041:2231::14, 172.71.182.95",
+            "x-forwarded-host": "gabito22.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-41-785c66d969-2bzjr",
+            "x-is-trusted": "yes",
+            "x-real-ip": "2a02:6ea0:c041:2231::14"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "estilo": "simpson",
+            "email": "favio.afm@gmail.com",
+            "phone": "584241322469"
+          },
+          "webhookUrl": "https://gabito22.app.n8n.cloud/webhook/webhookimagenes",
+          "executionMode": "production"
+        },
+        "binary": {
+          "data0": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpg",
+            "data": "filesystem-v2",
+            "fileName": "selfie.jpg",
+            "id": "filesystem-v2:workflows/OVPdXnCHlN6a8oC5/executions/temp/binary_data/765da32f-08bb-40a1-813a-c7c1c57a5aef",
+            "fileSize": "45.4 kB"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Wait": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a file": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enlace": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "enlace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Delete a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3e3d1433-6cb5-4075-a33a-4478713467ca",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98112b24ced8988cb2fd718962b8814e8d7ed34efe92f8302f3e8fd60a3df789"
+  },
+  "id": "OVPdXnCHlN6a8oC5",
+  "tags": []
+}

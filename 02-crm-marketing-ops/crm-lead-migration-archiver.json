@@ -1,0 +1,622 @@
+{
+  "name": "Mover Leads",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "obtenerleads",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        1584
+      ],
+      "id": "89cec994-f51e-4508-bc2f-ce2c6345b47c",
+      "name": "Webhook",
+      "webhookId": "54005fa7-a8a9-4f54-9b31-93460c057443"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.query.id_pipeline }}",
+                    "rightValue": "8807935",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f9b92281-610e-49bc-9747-c44f5c3369be"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HOJA BASE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -64,
+        1584
+      ],
+      "id": "4e272d2d-ae3a-4e8a-82a4-a4184e46d8a4",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// El ítem que entra ya es un lead individual del nodo anterior\nconst lead = item.json;\n\nconst mapaDeEtapas = {\n68992127: \"Leads Entrantes\",\n68992131: \"NO RESPONSE\",\n68992135: \"TO CONFIRM\",\n68992139: \"CONFIRMED THURSDAY 12PM\",\n69588755: \"CONFIRMED THURSDAY 06PM\",\n69588759: \"CONFIRMED FRIDAY 12PM\",\n69588763: \"CONFIRMED FRIDAY 06PM\",\n69588767: \"CONFIRMED SATURDAY 09AM\",\n69588771: \"CONFIRMED SATURDAY 12PM\",\n69588775: \"ATTENDED\",\n69588779: \"POTENCIAL CUSTOMER\",\n142: \"SUCCESSFULLY\",\n143: \"LOST SALES\",\n};\n\nconst nombreEtapaActual = mapaDeEtapas[lead.status_id] || \"Etapa Desconocida\";\n\nlet clasificacionFinal = \"No Confirmado\";\nfor (const palabra of [\"LOGRADO CON ÉXITO\",\"CONFIRMED\",\"ATTENDED\",\"POTENCIAL CUSTOMER\",\"PENDING PAYMENT\",\"SUCCESSFULLY\",\"Etiqueta asisitio\"]) {\n  if (nombreEtapaActual.toUpperCase().includes(palabra)) {\n    clasificacionFinal = \"Confirmado\";\n    break;\n  }\n}\n\n// Preparamos solo los datos necesarios para el log y para mover el lead\nconst datosDeSalida = {\n  id_lead_archivado: lead.id,\n  clasificacion_final: clasificacionFinal,\n   etiquetas: lead._embedded?.tags ? lead._embedded.tags.map(t => t.name).join(', ') : \"\",\n  nombre_lead: lead.name || \"\"\n};\n\nreturn { json: datosDeSalida };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        1584
+      ],
+      "id": "ed918acb-c0c0-44b5-8f87-c764814cf1f9",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1q6zwMVeQCZXMqPWqVQX2BREJZALUe5aUBZgE17K1MjQ",
+          "mode": "list",
+          "cachedResultName": "37 BASE DE DATOS DE INTERCAMBIO",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1q6zwMVeQCZXMqPWqVQX2BREJZALUe5aUBZgE17K1MjQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1q6zwMVeQCZXMqPWqVQX2BREJZALUe5aUBZgE17K1MjQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_lead_archivado": "={{ $json.id_lead_archivado }}",
+            "clasificacion_final": "={{ $json.clasificacion_final }}",
+            "nombre_lead": "={{ $json.nombre_lead }}",
+            "etiquetas": "={{ $json.etiquetas }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_lead_archivado",
+              "displayName": "id_lead_archivado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clasificacion_final",
+              "displayName": "clasificacion_final",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_lead",
+              "displayName": "nombre_lead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_contacto",
+              "displayName": "nombre_contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_contacto",
+              "displayName": "email_contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "telefono_contacto",
+              "displayName": "telefono_contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "etiquetas",
+              "displayName": "etiquetas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone_valid",
+              "displayName": "phone_valid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "conferencia_dia_y_hora",
+              "displayName": "conferencia_dia_y_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        1488
+      ],
+      "id": "54e449ab-8b5e-4910-a5ea-9181b00bd99e",
+      "name": "Append row in sheet",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Vtbp71c7pw69dgyR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contacts",
+        "returnAll": true,
+        "filter": {
+          "id": "={{ [$json._embedded.contacts[0].id] }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        592
+      ],
+      "id": "828f4c21-0e1d-4c49-97b5-ee457eb9d17b",
+      "name": "Get list of contacts",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = [];\n\n// Itera sobre cada item recibido (cada pipeline)\nfor (const pipelineItem of items) {\n  // Asegúrate de que _embedded y leads existan\n  const leads = pipelineItem.json._embedded?.leads;\n\n  if (Array.isArray(leads) && leads.length > 0) {\n    // Crea un item independiente por cada lead\n    for (const lead of leads) {\n      result.push({\n        json: {\n          ...lead, // Datos del lead\n          pipeline: pipelineItem.json // Datos originales de la pipeline para referencia\n        }\n      });\n    }\n  } else {\n    // Si no hay leads, opcional: conservar la pipeline como item \"vacío\"\n    result.push({\n      json: {\n        message: \"No leads in this pipeline\",\n        pipeline: pipelineItem.json\n      }\n    });\n  }\n}\n\n// Devuelve todos los items generados\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        1584
+      ],
+      "id": "68eada90-4b1c-4309-b68e-b7a05c4f0ac7",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1aaba76c-d251-4b2b-9dbf-2bc2563786b3",
+              "leftValue": "={{ $json._embedded?.contacts?.[0]?.id }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        1040
+      ],
+      "id": "ab466512-b18d-4f69-b175-c735f08f6cbc",
+      "name": "IF"
+    },
+    {
+      "parameters": {
+        "url": "=https://consulexperience.kommo.com/api/v4/contacts/{{ $('IF').item.json._embedded.contacts[0].id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -288,
+        144
+      ],
+      "id": "81b4197e-ae29-473a-b8a9-1c0a9f5bf80f",
+      "name": "HTTPC",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://consulexperience.kommo.com/api/v4/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=[\n  {\n    \"id\": {{ $json.id_lead_archivado }},\n    \"pipeline_id\": 9803843,\n    \"status_id\": 143\n  }\n]\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        832,
+        1680
+      ],
+      "id": "58a8c06e-7a3f-4079-9fd3-ffdfc464fc77",
+      "name": "HTTPC1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1f09620b-80a1-4866-8cf9-4c6246ceb2d3",
+              "leftValue": "={{ $json.etiquetas }}",
+              "rightValue": "CNI Portland 2405 Lead",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        368
+      ],
+      "id": "1986026c-27a0-4e2b-bed5-40c40bebf939",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "https://consulexperience.kommo.com/api/v4/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "with",
+              "value": "contacts"
+            },
+            {
+              "name": "filter[pipeline_id]",
+              "value": "={{ $json.query.id_pipeline }}"
+            },
+            {
+              "name": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        1584
+      ],
+      "id": "13ba5901-fac5-4a21-9b7b-f09a1e03a729",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        1264
+      ],
+      "id": "0b1d36c6-ed0c-4b4c-9aaf-9dafea4c09bc",
+      "name": "Wait",
+      "webhookId": "60b8eee1-b8c5-44d8-844f-88dca691d294"
+    },
+    {
+      "parameters": {
+        "resource": "leads",
+        "operation": "updateLeads",
+        "collection": {
+          "lead": [
+            {
+              "id": "={{ $json.id_lead_archivado }}",
+              "pipeline_id": 8544423,
+              "status_id": 0
+            },
+            {
+              "pipeline_id": 9803843,
+              "status_id": 143
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        816
+      ],
+      "id": "f8123108-d1fb-41c0-86df-0ca8b73cae62",
+      "name": "Update leads",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.consulexperience.com",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "accept-encoding": "gzip, br",
+            "accept-language": "es-US,es-419;q=0.9,es;q=0.8,en;q=0.7",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "190.6.17.147",
+            "cf-ipcountry": "VE",
+            "cf-ray": "97f154e88df39fe7-MIA",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cookie": "_ga=GA1.1.501459719.1751840459; _fbp=fb.1.1751840545777.565490588737700925; rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2BbvXc60mSwg076Cd3j4jjFg184gunuIGk%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2Bwm6VNrXblBbV2k05HlAqltZTwpUrqKr8%3D; _ga_B8S2TKLNTF=GS2.1.s1757673971$o104$g1$t1757674411$j60$l0$h0; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19vRs2eXHjWFBYd20M6KABk6JRdOwyaRfRLVqVIB7jMW%2B5erK27fb2%2B1a9skLmrOt1elZy5z2lW1Q%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19LD3LKWMOOJkdvfu0WPMGCqE3iaYVQUoTaU98ZN2njgnfz%2BVgT2GYlGol9rgZdN0%2Fc3XFIk4LxCzwOIv0Bkss2frjoHAO%2FXfqKMsD%2B8%2F2UULzM4MwQBE3AniB0ygkCCvhX3k4W%2BeBaUhSQ%2FfUfeZiBvFUnB86bm4o%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FO9OYgtSHmgFEWAv%2BrxBeVX1q0j7Y2xywQT6aY21OGKMhOYEeYmuudWkVDufb1MJyRRaDlnVuYFuVqYWxlw5jHFzqiW3YokXAJzPqCTtbah5Ck0eXwNfmSoDpMP%2BNE84lpbmxLy0GQDw%3D%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22distinct_id%22%3A%22246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453%23076d6190-e416-4bd5-b4b8-09f0e99eb762%22%2C%22%24sesid%22%3A%5B1757867804936%2C%2201994916-08ed-739d-8871-92221bec6f35%22%2C1757867804909%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fn8n.consulexperience.com%2Fsignin%22%7D%7D; rl_session=RudderEncrypt%3AU2FsdGVkX19JMnt7lW14KlaSWZokLvOsOZlbeMwxHBq53kS6WVGd8DWQIVM9IzH8EwoITYItDSj2S%2FYBWKCToCp6EvcDECOSIL4LaHRtYnSys26laxvDT1Y5h9VIXfmVCSyxerZu8vVxAaMwe9fC9A%3D%3D",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Brave\";v=\"140\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "sec-gpc": "1",
+            "upgrade-insecure-requests": "1",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "172.68.12.197",
+            "x-forwarded-host": "n8n.consulexperience.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {
+            "id_pipeline": "8722527"
+          },
+          "body": {},
+          "webhookUrl": "https://n8n.consulexperience.com/webhook/obtenerleads",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTPC1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get list of contacts": {
+      "main": [
+        []
+      ]
+    },
+    "IF": {
+      "main": [
+        []
+      ]
+    },
+    "HTTPC": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "DfJ2Aj193aPTVabu"
+  },
+  "versionId": "3eb177ef-b7f9-478a-bac7-695d6f33f66b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "QaRVDhWUhc34yNa6",
+  "tags": []
+}

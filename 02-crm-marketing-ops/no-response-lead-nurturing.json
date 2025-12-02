@@ -1,0 +1,602 @@
+{
+  "name": "CNI NO RESPONSE 01",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "NO-RESPONSE-01",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -32
+      ],
+      "id": "61c9a656-9f07-4dbe-a6de-f267f4d3e9b2",
+      "name": "Webhook",
+      "webhookId": "b36f5a2c-43db-4201-ab7f-7a8ce988a9c6"
+    },
+    {
+      "parameters": {
+        "resource": "leads",
+        "filter": {
+          "query": "={{ $json.body['leads[status][0][id]'] }}"
+        },
+        "options": {
+          "with": [
+            "contacts"
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "14c260d5-7820-4c19-b2a4-865d15b173b1",
+      "name": "Kommo API Node",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contacts",
+        "filter": {
+          "query": "={{ $json._embedded.leads[0]._embedded.contacts[0].id }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -32
+      ],
+      "id": "dbdb7701-187d-4536-b6cc-6765cf209e3b",
+      "name": "Kommo API Node1",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/search-by-email?email={{ $json.email }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        -32
+      ],
+      "id": "9145f0f2-8a1f-4204-909f-bb16bc690a51",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "lnmUGg7CCGo0bKiP",
+          "name": "Bearer Auth account"
+        },
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI San Juan 25/10 No Response 01\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        -320
+      ],
+      "id": "6fba022e-45ca-414b-827e-238bb4573f1f",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "60c719e9-f326-41af-a117-520f02ee6216",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        -32
+      ],
+      "id": "c81bbd91-46d5-46c4-9f56-3f3699a04ac0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Kommo API Node').item.json._embedded.leads[0].pipeline_id }}",
+                    "rightValue": 11963720,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "f80fe56f-f279-423f-ad82-070207d56b5d"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PUERTO RICO 25/10"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "65778f09-311d-450c-bb60-e4eeb51c0660",
+                    "leftValue": "={{ $('Kommo API Node').item.json._embedded.leads[0].pipeline_id }}",
+                    "rightValue": 12037996,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NY/NJ 25/10"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d72793fa-19f1-4b93-8dd0-e515ad812075",
+                    "leftValue": "={{ $('Kommo API Node').item.json._embedded.leads[0].pipeline_id }}",
+                    "rightValue": 12093480,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Portland 25/11"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "463f3d67-289d-4d10-9425-f3a53129237a",
+                    "leftValue": "={{ $('Kommo API Node').item.json._embedded.leads[0].pipeline_id }}",
+                    "rightValue": 12153016,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Seattle 25/11"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1568,
+        -64
+      ],
+      "id": "a3bfe9a2-2350-44f5-b7a2-fe9d368c8a8f",
+      "name": "Aca agrega el pipeline ID"
+    },
+    {
+      "parameters": {
+        "content": "ACA VAN LAS ETIQUETAS",
+        "height": 80,
+        "width": 180
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -448
+      ],
+      "id": "03077313-dd74-4bf5-b149-c5d99b20da0e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        -32
+      ],
+      "id": "fc62dfb3-32c2-440b-9723-d3d0d6f50afa",
+      "name": "Wait",
+      "webhookId": "0f0d469a-67ff-4fa8-af17-c14c4cafc2b2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const contacto = $json._embedded?.contacts?.[0] || {};\nconst campos = contacto.custom_fields_values || [];\n\nconst campoEmail = campos.find(c => c.field_code === \"EMAIL\");\nconst email = campoEmail?.values?.[0]?.value?.trim() || \"\";\n\nreturn [{\n  json: {\n    email\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -32
+      ],
+      "id": "7a780ad8-920b-48f4-80fd-d4a00528587c",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI NY/NJ 25/10 No Response 01\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        -128
+      ],
+      "id": "52467b3d-247e-4f28-bf81-d508de85a141",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI Portland 25/11 No Response 01\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        64
+      ],
+      "id": "4bd1352d-c2ea-4420-9a34-fc13b5f042b3",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI Seattle 25/11 No Response 01\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        256
+      ],
+      "id": "fa7f9fe4-6d5c-4842-9c15-68b8207e10cf",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.consulexperience.com",
+            "user-agent": "amoCRM-Webhooks/3.0",
+            "content-length": "314",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "169.150.216.79",
+            "cf-ipcountry": "US",
+            "cf-ray": "987f8fa01ed16b76-DFW",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/x-www-form-urlencoded",
+            "via": "2.0 Caddy",
+            "x-amocrm-requestid": "917b2feb-5f05-4e0e-b2cc-8e5a92d03d9c",
+            "x-forwarded-for": "172.68.27.230",
+            "x-forwarded-host": "n8n.consulexperience.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "leads[status][0][id]": "33361613",
+            "leads[status][0][status_id]": "93340676",
+            "leads[status][0][pipeline_id]": "12093480",
+            "leads[status][0][old_status_id]": "93340668",
+            "leads[status][0][old_pipeline_id]": "12093480",
+            "account[id]": "32689855",
+            "account[subdomain]": "consulexperience"
+          },
+          "webhookUrl": "https://n8n.consulexperience.com/webhook/NO-RESPONSE-01",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kommo API Node": {
+      "main": [
+        [
+          {
+            "node": "Kommo API Node1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kommo API Node1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Aca agrega el pipeline ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aca agrega el pipeline ID": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Kommo API Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "DfJ2Aj193aPTVabu"
+  },
+  "versionId": "a420170a-4f61-44c8-971e-cd7d41abca37",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "9UFdZxBj0KM1sl2C",
+  "tags": []
+}

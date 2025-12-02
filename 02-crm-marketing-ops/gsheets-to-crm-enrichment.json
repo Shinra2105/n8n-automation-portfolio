@@ -1,0 +1,628 @@
+{
+  "name": "Actualizar campo",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "corregirleads",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        1488
+      ],
+      "id": "eff41176-1541-429e-88d8-198f613bf5f1",
+      "name": "Webhook",
+      "webhookId": "3e429497-4693-444d-a752-1a91ce10cdcb"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.query.id_pipeline }}",
+                    "rightValue": "12153016",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f9b92281-610e-49bc-9747-c44f5c3369be"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HOJA BASE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -64,
+        1488
+      ],
+      "id": "d493a489-3f4e-4544-9a49-fe8fb8a77845",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "contacts",
+        "returnAll": true,
+        "filter": {
+          "id": "={{ [$json._embedded.contacts[0].id] }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        592
+      ],
+      "id": "ba1f5962-0fe6-4857-8983-0801d6b752c4",
+      "name": "Get list of contacts",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1aaba76c-d251-4b2b-9dbf-2bc2563786b3",
+              "leftValue": "={{ $json._embedded?.contacts?.[0]?.id }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        1040
+      ],
+      "id": "59431988-293c-4b84-8bde-c8d39bdeb981",
+      "name": "IF"
+    },
+    {
+      "parameters": {
+        "url": "=https://consulexperience.kommo.com/api/v4/contacts/{{ $('IF').item.json._embedded.contacts[0].id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -288,
+        144
+      ],
+      "id": "5ebd9d15-f16d-4e19-a6b9-14daf709b666",
+      "name": "HTTPC",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://consulexperience.kommo.com/api/v4/leads/{{ $('Code2').item.json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"custom_fields_values\": [\n    {\n      \"field_id\": 2105673,\n      \"values\": [\n        {\n          \"value\": \"{{ $('Get row(s) in sheet').item.json['Conferencia Dia y Hora'] }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1728,
+        1488
+      ],
+      "id": "707eaab3-d330-4411-95d8-5ed246a51d62",
+      "name": "HTTPC1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1f09620b-80a1-4866-8cf9-4c6246ceb2d3",
+              "leftValue": "={{ $json.etiquetas }}",
+              "rightValue": "CNI Portland 2405 Lead",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        368
+      ],
+      "id": "8779dcce-9a9a-4e8d-aef7-944148a68de6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "https://consulexperience.kommo.com/api/v4/leads/unsorted",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "with",
+              "value": "contacts"
+            },
+            {
+              "name": "filter[pipeline_id]",
+              "value": "={{ $json.query.id_pipeline }}"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        1488
+      ],
+      "id": "8cba7991-50a3-4d3b-88b2-3d8b896b8723",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        1264
+      ],
+      "id": "53d840c3-7481-42ba-a407-0d313c7a8e6e",
+      "name": "Wait",
+      "webhookId": "afe5fdae-f37e-4a64-9f9c-0972e96bff01"
+    },
+    {
+      "parameters": {
+        "resource": "leads",
+        "operation": "updateLeads",
+        "collection": {
+          "lead": [
+            {
+              "id": "={{ $json.id_lead_archivado }}",
+              "pipeline_id": 8544423,
+              "status_id": 0
+            },
+            {
+              "pipeline_id": 9803843,
+              "status_id": 143
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        816
+      ],
+      "id": "4984eacc-273c-4986-8dff-8af4aea6809e",
+      "name": "Update leads",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = [];\n// Accedemos al array 'unsorted' que contiene los leads\nconst unsortedItems = items[0].json._embedded?.unsorted;\n\nif (Array.isArray(unsortedItems)) {\n  for (const item of unsortedItems) {\n    // Cada 'item' aquí es un lead no ordenado.\n    // El ID del lead real está en item._embedded.leads[0].id\n    // El ID del contacto real está en item._embedded.contacts[0].id\n    const leadData = item._embedded?.leads?.[0];\n    const contactData = item._embedded?.contacts?.[0];\n\n    // Solo continuamos si encontramos tanto el lead como el contacto\n    if (leadData && contactData) {\n      // Creamos un nuevo item de salida con la información crucial y limpia\n      result.push({\n        json: {\n          id: leadData.id, // ID del Lead\n          contact_id: contactData.id, // ID del Contacto\n          // También pasamos la estructura original por si se necesita\n          full_unsorted_item: item\n        }\n      });\n    }\n  }\n}\n\n// Devolvemos la lista de items, cada uno es un lead para procesar\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        1488
+      ],
+      "id": "6a227c0b-0f24-450b-a0aa-9bb1c6ceacf6",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Este código se ejecuta para cada lead individualmente.\n// Asegúrate que en \"Settings\" del nodo, \"Execute Once\" sea false.\nconst lead = item.json;\nconst contactoPrincipal = lead._embedded?.contacts?.[0];\n\nif (contactoPrincipal) {\n  item.json.id_contacto_extraido = contactoPrincipal.id;\n  return item;\n} else {\n  // Si no hay contacto, no podemos continuar.\n  return null;\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        864
+      ],
+      "id": "9914f097-bc24-4102-96e6-3ce6990b63b5",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1euQiKycWNYdwLtxetwB3RhHqZnCACpynBGYbsQ5xBvY",
+          "mode": "list",
+          "cachedResultName": "41 Master Seattle 2025 Nov CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1euQiKycWNYdwLtxetwB3RhHqZnCACpynBGYbsQ5xBvY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1euQiKycWNYdwLtxetwB3RhHqZnCACpynBGYbsQ5xBvY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Correo",
+              "lookupValue": "={{ $json.email_para_busqueda }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        1488
+      ],
+      "id": "db11f6a6-1b9d-42ae-906a-03adbf551d76",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Vtbp71c7pw69dgyR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a1d20ed6-6e65-4f43-9c90-36f38534f818",
+              "leftValue": "={{ $('Get row(s) in sheet').all().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        1488
+      ],
+      "id": "45540a80-5aea-494a-92fb-3fc129c0d9e2",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "=https://consulexperience.kommo.com/api/v4/contacts/{{$json.contact_id}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        784,
+        1488
+      ],
+      "id": "75eca652-4f2f-4cd9-af42-9c535eddc8b3",
+      "name": "HTTPC2",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtenemos los datos originales del lead (incluyendo su ID) del nodo \"Code1\"\nconst leadData = $('Code1').item.json;\n\n// 'items[0].json' es la salida del nodo anterior (HTTPC2), que contiene los detalles del contacto\nconst contacto = items[0].json;\n\n// Buscamos el email de forma segura en los datos del contacto\nconst campoEmail = contacto.custom_fields_values?.find(f => f.field_code === 'EMAIL');\n\nif (campoEmail && campoEmail.values?.[0]?.value) {\n    const emailValue = campoEmail.values[0].value;\n    const cleanEmail = emailValue.trim().toLowerCase();\n\n    // Creamos un nuevo objeto de salida que combina los datos originales del lead\n    // con el nuevo email que hemos extraído.\n    const result = {\n        ...leadData, // Esto copia todo de leadData (como 'id' y 'contact_id')\n        email_para_busqueda: cleanEmail // Y añadimos el email para buscar en Sheets\n    };\n\n    return { json: result };\n\n} else {\n    // Si no hay email, detenemos el procesamiento para este item\n    return null;\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        1488
+      ],
+      "id": "286a9020-e38b-4580-9566-24bcf88d2483",
+      "name": "Code2"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.consulexperience.com",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "accept-encoding": "gzip, br",
+            "accept-language": "es-US,es-419;q=0.9,es;q=0.8,en;q=0.7",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "186.24.12.186",
+            "cf-ipcountry": "VE",
+            "cf-ray": "98e7d5813fe72782-EZE",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cookie": "_ga=GA1.1.501459719.1751840459; _fbp=fb.1.1751840545777.565490588737700925; __stripe_mid=fdf74661-7819-4671-91da-ae578696ef495348cd; rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19lSYwvt6Bz6w9%2FPA8IA6tJ%2FjXfscDx5qc%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2FI%2BOrKRy%2F66hkzpyClMeUjC7S7kNElblA%3D; sc_is_visitor_unique=rx13167856.1760374098.800D3BAF3E714ABEAEED4769A7FA406D.44.34.31.29.27.19.11.6.3-13167842.1758284367.4.4.2.2.2.1.1.1.1; _ga_B8S2TKLNTF=GS2.1.s1760402854$o173$g0$t1760403096$j60$l0$h0; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19CTKvVT%2F%2FYv9qb8W8PLbvbsr8hkcgCyFiMrcr85kaw%2B24gujFQSApZIhmYh5akQBRuldavrJ0JEQ%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19NHDfjbcuyWDmhXA6aTrCF9ksCb8%2BJBTn9Lozpqg0stmZ7reonB1nWqRFvE%2BGU%2BiZmlEUQLFsq92vg6vHlY%2FiYZa2dyRwJuNCZj1uvRZXVLnP%2Fwp8bmgBL1p78TBm4hYtsxJ89jipfx8o7zXEjeOthKy%2FfhTHWNpc%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19G9zNBLNsgGvfwl30B7o5oV%2BTjGHcjkOT5yRgepLy28Phe4yVAPP4u3Jnt4HsecfrmKL6N4iyMxS5lGdD0u5GW%2FdwaNMweDCzbS2UEyxEq3YQZxPBfHijHqkUwD%2FjRYV%2F9v%2BgI2ueVaA%3D%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22distinct_id%22%3A%22246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453%23076d6190-e416-4bd5-b4b8-09f0e99eb762%22%2C%22%24sesid%22%3A%5Bnull%2C%220199e328-a370-78bc-81fc-91a663474e95%22%2C1760452715376%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fn8n.consulexperience.com%2Fsignin%22%7D%7D; rl_session=RudderEncrypt%3AU2FsdGVkX19wqI6XVkzHLc6kmanrOnxvUQ3zLqXGFCLtdjx3mBWeVNt6JZbdF%2Bdv31npoSErLU66rpYP%2Foz2%2B7LFSs5ri0qQ4EGUFKt5K9LfTRxId6JcFMpfOcLlWSqi8ELPKOumh%2FP7Uh932RqLjw%3D%3D",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "sec-gpc": "1",
+            "upgrade-insecure-requests": "1",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "198.41.230.99",
+            "x-forwarded-host": "n8n.consulexperience.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {
+            "id_pipeline": "12153016"
+          },
+          "body": {},
+          "webhookUrl": "https://n8n.consulexperience.com/webhook-test/corregirleads",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get list of contacts": {
+      "main": [
+        []
+      ]
+    },
+    "IF": {
+      "main": [
+        []
+      ]
+    },
+    "HTTPC": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        []
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTPC2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTPC1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTPC2": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e1d16187-f9e6-411f-9fc8-5800ed24f4c1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "7VKGCOHm5qROArn8",
+  "tags": []
+}

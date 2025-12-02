@@ -1,0 +1,670 @@
+{
+  "name": "CNI PUERTO RICO TAGs UPDATE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "updatepuertorico",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        160
+      ],
+      "id": "9bd91fc4-2e9f-4914-8b67-23a92b09519e",
+      "name": "Webhook",
+      "webhookId": "05da9604-104c-4300-94c1-ce0442278d64"
+    },
+    {
+      "parameters": {
+        "resource": "leads",
+        "filter": {
+          "query": "={{ $json.body['leads[status][0][id]'] }}"
+        },
+        "options": {
+          "with": [
+            "contacts"
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        448,
+        160
+      ],
+      "id": "9a22db6b-5b54-40f0-b370-217596eeb487",
+      "name": "Kommo API Node",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contacts",
+        "filter": {
+          "query": "={{ $json._embedded.leads[0]._embedded.contacts[0].id }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        672,
+        160
+      ],
+      "id": "a223c98c-2c44-4ca5-b3f2-6fd084d66ab0",
+      "name": "Kommo API Node1",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "IZWfBcSOFxNXc2pq",
+          "name": "Kommo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/search-by-email?email={{ $json.email }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        160
+      ],
+      "id": "5bdc750a-eeed-4955-9837-1b391a23a043",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI San Juan 25/10 Vie Registrado\", \"CNI San Juan 25/10 Vie 12pm Registrado\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        -320
+      ],
+      "id": "a9b84726-8960-44e9-85e6-178621127617",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body['leads[status][0][status_id]'] }}",
+                    "rightValue": "4852",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    },
+                    "id": "f80fe56f-f279-423f-ad82-070207d56b5d"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Viernes 12"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b877cfbf-9635-4c04-a5e5-342b7b18cc4c",
+                    "leftValue": "={{ $('Webhook').item.json.body['leads[status][0][status_id]'] }}",
+                    "rightValue": "4856",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Vienes 06"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9284934f-c3f9-48ac-99c9-307a19bd10bc",
+                    "leftValue": "={{ $('Webhook').item.json.body['leads[status][0][status_id]'] }}",
+                    "rightValue": "4860",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sabado 09"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5efcff51-f650-4c59-9946-facb2352dd18",
+                    "leftValue": "={{ $('Webhook').item.json.body['leads[status][0][status_id]'] }}",
+                    "rightValue": "4864",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sabado 12"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d0ff9268-d4b9-40d8-be55-c976fb11d40d",
+                    "leftValue": "={{ $('Webhook').item.json.body['leads[status][0][status_id]'] }}",
+                    "rightValue": "8752",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Jueves 12"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3553e754-561b-43d8-9411-af9528f01141",
+                    "leftValue": "={{ $('Webhook').item.json.body['leads[status][0][status_id]'] }}",
+                    "rightValue": "8756",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Jueves 06"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1344,
+        96
+      ],
+      "id": "7e85fe86-743f-4710-98f6-eb8ae772aa4b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI San Juan 25/10 Vie Registrado\",\"CNI San Juan 25/10 Vie 06pm Registrado\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        -128
+      ],
+      "id": "ada05aad-dee6-45e2-a07f-b83f927bf34d",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI San Juan 25/10 Sab Registrado\", \"CNI San Juan 25/10 Sab 09am Registrado\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        64
+      ],
+      "id": "754a3c70-e3dc-4cc4-84b1-6f789c30dc8e",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI San Juan 25/10 Sab Registrado\", \"CNI San Juan 25/10 Sab 12pm Registrado\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        256
+      ],
+      "id": "34626015-b1a4-4157-bebe-7a6883e7a4c5",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        160
+      ],
+      "id": "83c4f97c-dcad-4c27-aaba-731bed4f3d49",
+      "name": "Wait",
+      "webhookId": "5a1b1bac-d2de-440e-af5f-8d90a91dc655"
+    },
+    {
+      "parameters": {
+        "jsCode": "const contacto = $json._embedded?.contacts?.[0] || {};\nconst campos = contacto.custom_fields_values || [];\n\nconst campoEmail = campos.find(c => c.field_code === \"EMAIL\");\nconst email = campoEmail?.values?.[0]?.value?.trim() || \"\";\n\nreturn [{\n  json: {\n    email\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        160
+      ],
+      "id": "efffbba4-dada-42b5-b90d-d174924b663e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI San Juan 25/10 Jue Registrado\", \"CNI San Juan 25/10 Jue 12pm Registrado\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        448
+      ],
+      "id": "84e0f49e-841d-47e9-a442-c1748695b6af",
+      "name": "HTTP Request5",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI San Juan 25/10 Jue Registrado\", \"CNI San Juan 25/10 Jue 06pm Registrado\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        640
+      ],
+      "id": "a62a6cfa-9a90-4223-9015-fa510bcc14f4",
+      "name": "HTTP Request6",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.consulexperience.com",
+            "user-agent": "amoCRM-Webhooks/3.0",
+            "content-length": "314",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "169.150.216.79",
+            "cf-ipcountry": "US",
+            "cf-ray": "97d9438808e134ad-ORD",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/x-www-form-urlencoded",
+            "via": "2.0 Caddy",
+            "x-amocrm-requestid": "54c195de-7a13-407a-b155-d8cb6fa66a7c",
+            "x-forwarded-for": "172.69.17.127",
+            "x-forwarded-host": "n8n.consulexperience.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "leads[status][0][id]": "33094761",
+            "leads[status][0][status_id]": "92244852",
+            "leads[status][0][pipeline_id]": "11963720",
+            "leads[status][0][old_status_id]": "92248756",
+            "leads[status][0][old_pipeline_id]": "11963720",
+            "account[id]": "32689855",
+            "account[subdomain]": "consulexperience"
+          },
+          "webhookUrl": "https://n8n.consulexperience.com/webhook/updatepuertorico",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kommo API Node": {
+      "main": [
+        [
+          {
+            "node": "Kommo API Node1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kommo API Node1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Kommo API Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "DfJ2Aj193aPTVabu"
+  },
+  "versionId": "d2e2071f-a6c2-4649-a3f8-21de3f3a467b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "QA5f8l6M3YW5eMtV",
+  "tags": []
+}

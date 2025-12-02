@@ -1,0 +1,327 @@
+{
+  "name": "02 Raleigh 25/05 - CONFIRMAR",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "f7738c81-7c0c-4349-8b71-c760e206bb76",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        -304
+      ],
+      "id": "c66e2bae-736b-4a30-888b-854926a1e8e5",
+      "name": "Webhook",
+      "webhookId": "f7738c81-7c0c-4349-8b71-c760e206bb76"
+    },
+    {
+      "parameters": {
+        "resource": "contacts",
+        "filter": {
+          "id": "={{ $json._embedded.leads[0]._embedded.contacts[0].id }}"
+        },
+        "options": {
+          "with": [
+            "leads"
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -304
+      ],
+      "id": "789a8304-39a3-4061-a776-3b09346e29bb",
+      "name": "Kommo API Node1",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "rwzh8pIlf0xfQ2i5",
+          "name": "Kommo Consul Experince"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "leads",
+        "operation": "updateLeads",
+        "collection": {
+          "lead": [
+            {
+              "id": "=31542139",
+              "pipeline_id": 11027024,
+              "status_id": 75362827
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        112
+      ],
+      "id": "af0cf160-d213-4ab1-8c92-96dd08f141c2",
+      "name": "Mover al Lead A otro pipeline",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "rwzh8pIlf0xfQ2i5",
+          "name": "Kommo Consul Experince"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "leads",
+        "filter": {
+          "id": "={{ $json.body['leads[status][0][id]'] }}"
+        },
+        "options": {
+          "with": [
+            "source_id",
+            "contacts"
+          ]
+        }
+      },
+      "type": "n8n-nodes-kommo.kommo",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -304
+      ],
+      "id": "b07d3ef1-068f-4440-a688-338b752193b4",
+      "name": "Obtener Lead",
+      "credentials": {
+        "kommoOAuth2Api": {
+          "id": "rwzh8pIlf0xfQ2i5",
+          "name": "Kommo Consul Experince"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.retellai.com/v2/create-phone-call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer key_a29c5585adbf68edce6c4ae0d53c"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from_number\": \"+19848332097\",\n  \"to_number\": \"{{ $json._embedded.contacts[0].custom_fields_values.find(item => item.field_name = \"Phone\").values[0].value.replaceAll(\" \", \"\").replaceAll(\"-\",\"\")}}\",\n  \"override_agent_id\": \"agent_133948b5a9456a41127ef02fcc\",\n  \"retell_llm_dynamic_variables\": {\n    \"name\": \"{{ $('Obtener Lead').item.json._embedded.leads[0].name.split(\" \").first() }}\",\n    \"contactID\": \"{{ $json._embedded.contacts[0].id }}\",\n    \"ciudad\": \"Raleigh\",\n    \"evento\": \"{{$json._embedded.contacts[0].custom_fields_values.find(item => \n   item.values && item.values[0] && /\\d{2}:\\d{2}\\s*(am|pm)/i.test(item.values[0].value)\n).values[0].value}}\",\n    \"leadID\": \"{{ $('Obtener Lead').item.json._embedded.leads[0].id }}\",\n    \"type_call\": \"confirmacion\"\n  }\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        272,
+        -304
+      ],
+      "id": "0f318c2f-ad8d-49bb-b89a-4c3f3db83b2b",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {
+    "Mover al Lead A otro pipeline": [
+      {
+        "json": {
+          "_links": {
+            "self": {
+              "href": "https://consulexperience.kommo.com/api/v4/leads"
+            }
+          },
+          "_embedded": {
+            "leads": [
+              {
+                "id": 31542139,
+                "updated_at": 1746636752,
+                "_links": {
+                  "self": {
+                    "href": "https://consulexperience.kommo.com/api/v4/leads/31542139"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.consulexperience.com",
+            "user-agent": "amoCRM-Webhooks/3.0",
+            "content-length": "314",
+            "accept-encoding": "gzip",
+            "content-type": "application/x-www-form-urlencoded",
+            "via": "1.1 Caddy",
+            "x-amocrm-requestid": "95050e2d-1436-4eaa-b0a8-ebd652b9cd07",
+            "x-forwarded-for": "169.150.216.79",
+            "x-forwarded-host": "n8n.consulexperience.com",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "leads[status][0][id]": "31542925",
+            "leads[status][0][status_id]": "84585644",
+            "leads[status][0][pipeline_id]": "11027024",
+            "leads[status][0][old_status_id]": "84585648",
+            "leads[status][0][old_pipeline_id]": "11027024",
+            "account[id]": "32689855",
+            "account[subdomain]": "consulexperience"
+          },
+          "webhookUrl": "https://n8n.consulexperience.com/webhook-test/f7738c81-7c0c-4349-8b71-c760e206bb76",
+          "executionMode": "test"
+        }
+      }
+    ],
+    "Kommo API Node1": [
+      {
+        "json": {
+          "_page": 1,
+          "_links": {
+            "self": {
+              "href": "https://consulexperience.kommo.com/api/v4/contacts?filter%5Bid%5D%5B0%5D=32465085&with=leads&page=1&limit=50"
+            }
+          },
+          "_embedded": {
+            "contacts": [
+              {
+                "id": 32465085,
+                "name": "",
+                "first_name": "",
+                "last_name": "",
+                "responsible_user_id": 11099655,
+                "group_id": 0,
+                "created_by": 0,
+                "updated_by": 11099655,
+                "created_at": 1746637179,
+                "updated_at": 1746637190,
+                "closest_task_at": null,
+                "is_deleted": false,
+                "is_unsorted": false,
+                "custom_fields_values": [
+                  {
+                    "field_id": 1975078,
+                    "field_name": "Phone",
+                    "field_code": "PHONE",
+                    "field_type": "multitext",
+                    "values": [
+                      {
+                        "value": "+351969948606",
+                        "enum_id": 1275632,
+                        "enum_code": "MOB"
+                      }
+                    ]
+                  },
+                  {
+                    "field_id": 1975080,
+                    "field_name": "Email",
+                    "field_code": "EMAIL",
+                    "field_type": "multitext",
+                    "values": [
+                      {
+                        "value": "umindsai111@gmail.com",
+                        "enum_id": 1275640,
+                        "enum_code": "WORK"
+                      }
+                    ]
+                  },
+                  {
+                    "field_id": 2080162,
+                    "field_name": "Conferencia Dia y Hora",
+                    "field_code": null,
+                    "field_type": "select",
+                    "values": [
+                      {
+                        "value": "Viernes 06:00 pm",
+                        "enum_id": 1362305,
+                        "enum_code": null
+                      }
+                    ]
+                  }
+                ],
+                "account_id": 32689855,
+                "_links": {
+                  "self": {
+                    "href": "https://consulexperience.kommo.com/api/v4/contacts/32465085?filter%5Bid%5D%5B0%5D=32465085&with=leads&page=1&limit=50"
+                  }
+                },
+                "_embedded": {
+                  "tags": [],
+                  "leads": [
+                    {
+                      "id": 31542925,
+                      "_links": {
+                        "self": {
+                          "href": "https://consulexperience.kommo.com/api/v4/leads/31542925?filter%5Bid%5D%5B0%5D=32465085&with=leads&page=1&limit=50"
+                        }
+                      }
+                    }
+                  ],
+                  "companies": []
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Obtener Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kommo API Node1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Lead": {
+      "main": [
+        [
+          {
+            "node": "Kommo API Node1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "eb79a8b2-f0c5-4013-bfb8-418edc166592",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "bJWkqAdAeNHVX3VX",
+  "tags": []
+}

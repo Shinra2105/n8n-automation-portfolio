@@ -1,0 +1,1079 @@
+{
+  "name": "CNI CONFERENCIAS SIMVOLY ENTRADA VIP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "VIPPORTLAND",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        608
+      ],
+      "id": "4a020e6b-e938-4dcd-8f36-faa234b0ebeb",
+      "webhookId": "d98b7e86-8397-442e-8d0e-cb6adecca83e"
+    },
+    {
+      "parameters": {
+        "functionCode": "const item = items[0];\nconst body = item.json.body ?? {};\n\n// Extraemos el email\nconst emailComprador = body.customerEmail ?? '';\n\n// Buscamos el horario VIP específico en las etiquetas (tags)\nlet horarioVip = 'Regular'; \nconst tagsDeCompra = body.tags ?? [];\n\nfor (const tag of tagsDeCompra) {\n  const upperTag = tag.toUpperCase();\n  if (upperTag.includes('VIP') && upperTag.includes('10AM')) {\n    horarioVip = 'VIP 10am';\n    break;\n  }\n  if (upperTag.includes('VIP') && upperTag.includes('3PM')) {\n    horarioVip = 'VIP 3pm';\n    break;\n  }\n}\n\n// Devolvemos ambos datos\nreturn [{ \n  json: { \n    email: emailComprador,\n    horario_vip: horarioVip \n  } \n}];"
+      },
+      "name": "Code1",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        416,
+        608
+      ],
+      "id": "dcbdb787-80fd-4cbb-8228-09d63d7ad2b4"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "10971b41-a633-4c94-af37-096b0da5d94f",
+                    "leftValue": "={{ $('Webhook').item.json.body.formName }}",
+                    "rightValue": "Form San Juan",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SAN JUAN 25/10"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d5240395-d62f-4e6c-b273-fba66b933de5",
+                    "leftValue": "={{ $('Webhook').item.json.body.formName }}",
+                    "rightValue": "Form NY/NJ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NY/NJ"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "63304c9d-1dd3-4ad1-8ed8-b4fa3b62a3ca",
+                    "leftValue": "={{ $('Webhook').item.json.body.formName }}",
+                    "rightValue": "Form Portland",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Portland 25/11"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -480,
+        256
+      ],
+      "id": "11e87092-3039-48e3-98f4-fca0a8fff5ed",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "IMPORTANTE ACA DEBES DE TRABAJAR CON EL ENLACE DEL SHEET ",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -64
+      ],
+      "id": "b985e6ba-1e75-4c29-9855-4dbae16c5958",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        192,
+        608
+      ],
+      "id": "406e8bfc-b34d-4677-beec-364d1a257297",
+      "name": "Wait",
+      "webhookId": "117e3584-7468-4148-b57a-6b4ff586f3be"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "499a35d5-2380-4083-a928-c2b76cce7765",
+              "leftValue": "={{ $json.body.items[0].name }}",
+              "rightValue": "VIP",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        608
+      ],
+      "id": "3586503b-4880-4835-a947-49b72e7949eb",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LOgUfZW9NWee47d-ghMn_pm1ARQLdL5Uhhhj4VJF5tA",
+          "mode": "list",
+          "cachedResultName": "40 Master Portland 2025 Nov",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LOgUfZW9NWee47d-ghMn_pm1ARQLdL5Uhhhj4VJF5tA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1010139439,
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LOgUfZW9NWee47d-ghMn_pm1ARQLdL5Uhhhj4VJF5tA/edit#gid=1010139439"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Correo",
+              "lookupValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        608
+      ],
+      "id": "a25b6500-49c1-4f4d-8025-dddea3bfc8c5",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Vtbp71c7pw69dgyR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODO 4: El \"Ensamblador\" - Versión Robusta\n// Maneja duplicados y mapea todos los campos dinámicamente.\n\n// 1. Manejo de Casos: No encontrado y Duplicados\n// Si no se encontró ningún registro (items está vacío), detenemos el flujo.\nif (items.length === 0) {\n  return [];\n}\n// Si se encontraron duplicados, solo procesamos el PRIMER resultado.\nconst item = items[0];\n\n\n// --- 2. Extraer las Fuentes de Datos ---\n// Datos del Registro Original (del nodo Google Sheets \"Get row\").\nconst datosOriginales = item.json ?? {};\n\n// Datos de la Compra VIP (del nodo \"Traductor\").\nconst datosCompra = item.pairedItem?.json ?? {};\n\n\n// --- 3. Ensamblar el Objeto Final (Mapeo Dinámico) ---\nconst filaFinalVip = {\n  // Con '...', copiamos automáticamente TODOS los campos del registro original.\n  ...datosOriginales,\n\n  // Ahora, sobrescribimos y añadimos los datos específicos de la compra.\n  \"Fecha de Compra\": datosCompra.fechaCompra ?? new Date().toLocaleString(\"es-VE\", { timeZone: \"America/New_York\" }),\n  \"Correo\": datosCompra.email ?? datosOriginales[\"Correo\"] ?? '', // Nos aseguramos de usar el email de la compra\n  \"Tipo de Lead\": datosCompra.tipoLead ?? 'VIP',\n  \"Producto Comprado\": datosCompra.productoComprado ?? '',\n  // También actualizamos el Status para reflejar la compra.\n  \"Status\": \"Compró VIP\"\n};\n\n\n// Devolvemos un array con UN ÚNICO item, que es nuestra fila final y completa.\nreturn [{ json: filaFinalVip }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        608
+      ],
+      "id": "62f64004-6e64-412f-a512-f4b93522c104",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LOgUfZW9NWee47d-ghMn_pm1ARQLdL5Uhhhj4VJF5tA",
+          "mode": "list",
+          "cachedResultName": "40 Master Portland 2025 Nov",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LOgUfZW9NWee47d-ghMn_pm1ARQLdL5Uhhhj4VJF5tA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1822192706,
+          "mode": "list",
+          "cachedResultName": "CRM VIP",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LOgUfZW9NWee47d-ghMn_pm1ARQLdL5Uhhhj4VJF5tA/edit#gid=1822192706"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $json.Fecha }}",
+            "Nombre del Lead": "={{ $json['Nombre del Lead'] }}",
+            "Phone Status": "={{ $json['Phone Status'] }}",
+            "Teléfono Celular": "={{ $json['Teléfono Celular'] }}",
+            "Correo": "={{ $json.Correo }}",
+            "Horario Vip": "={{ $json['Conferencia Dia y Hora'] }}",
+            "utm_source": "={{ $json.utm_source }}",
+            "utm_medium": "={{ $json.utm_medium }}",
+            "utm_campaign": "={{ $json.utm_campaign }}",
+            "utm_term": "={{ $json.utm_term }}",
+            "utm_content": "={{ $json.utm_content }}",
+            "Item": "={{ $json.Item }}",
+            "Dia": "={{ $json.Dia }}",
+            "Mes": "={{ $json.Mes }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre del Lead",
+              "displayName": "Nombre del Lead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Status",
+              "displayName": "Phone Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Teléfono Celular",
+              "displayName": "Teléfono Celular",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Correo",
+              "displayName": "Correo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Horario Vip",
+              "displayName": "Horario Vip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Asistencia ",
+              "displayName": "Asistencia ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Observaciones",
+              "displayName": "Observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "utm_source",
+              "displayName": "utm_source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "utm_medium",
+              "displayName": "utm_medium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "utm_campaign",
+              "displayName": "utm_campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "utm_term",
+              "displayName": "utm_term",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "utm_content",
+              "displayName": "utm_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Item",
+              "displayName": "Item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dia",
+              "displayName": "Dia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mes",
+              "displayName": "Mes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1312,
+        608
+      ],
+      "id": "9aa2e5bd-a6c7-4c30-8019-07eefa03b5b1",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Vtbp71c7pw69dgyR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1088,
+        608
+      ],
+      "id": "41bbdfbc-167f-462d-ab60-2f9d9847ece1",
+      "name": "Wait1",
+      "webhookId": "09bd7075-3f0c-45f5-a005-80483166dd29"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Append row in sheet').item.json['Horario Vip'] }}",
+                    "rightValue": "10:00 pm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "8ffae2c0-d5e8-4871-8d11-1eb579c35853"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Mover 10 am"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6f4d1451-f1a6-47b4-98fc-35f12b1a2062",
+                    "leftValue": "={{ $('Append row in sheet').item.json['Horario Vip'] }}",
+                    "rightValue": "3:00 pm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Mover 3pm"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1984,
+        608
+      ],
+      "id": "d2c95db0-bf85-496e-9f50-7dfb8880c241",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = items[0];\nconst leadsEntrantes = item.json._embedded?.unsorted ?? [];\n\nif (leadsEntrantes.length === 0) {\n  return [];\n}\n\nconst leadCorrecto = leadsEntrantes.find(lead => \n  lead.metadata?.form_name && \n  lead.metadata.form_name.toUpperCase().includes('PORTLAND')\n);\n\nif (!leadCorrecto) {\n  return [];\n}\n\nconst idDelLeadParaActualizar = leadCorrecto._embedded?.leads?.[0]?.id;\nif (!idDelLeadParaActualizar) {\n  return [];\n}\n\n// Devolvemos solo el ID del lead\nreturn [{ \n  json: { \n    lead_id: idDelLeadParaActualizar \n  } \n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        608
+      ],
+      "id": "b606e127-48f8-42c3-bf0b-92700ad54c57",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "url": "https://consulexperience.kommo.com/api/v4/leads/unsorted",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "with",
+              "value": "contacts"
+            },
+            {
+              "name": "filter[contact_query]",
+              "value": "={{ $json.Correo }}"
+            },
+            {
+              "name": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1536,
+        608
+      ],
+      "id": "47008dff-4f2b-47f7-bcdc-a1bc206e83c2",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://consulexperience.kommo.com/api/v4/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=[\n  {\n    \"id\": {{ $json.lead_id }},\n    \"pipeline_id\": 12093480,\n    \"status_id\": 93430016\n  }\n]\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2208,
+        704
+      ],
+      "id": "bef224c8-b709-46e6-a090-704bcf675041",
+      "name": "HTTPC1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://consulexperience.kommo.com/api/v4/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=[\n  {\n    \"id\": {{ $json.lead_id }},\n    \"pipeline_id\": 12093480,\n    \"status_id\": 93430012\n  }\n]\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2208,
+        512
+      ],
+      "id": "b42867f2-72ea-4632-bbb9-941dcfbab76f",
+      "name": "HTTPC",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A7dEspknodsgouXY",
+          "name": "Bearer Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI Portland 25/11 Lead Vip 9am\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2432,
+        512
+      ],
+      "id": "4e43703f-77c7-458a-8c9a-2d7eb1073e5b",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://consulexperience.simvoly.com/api/site/contacts/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"name\": \"{{ $json.name }}\",\n    \"email\": \"{{ $json.email }}\",\n    \"phone\": \"{{ $json.phone }}\",\n    \"tags\": [\"CNI Portland 25/11 Lead Vip 2pm\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2432,
+        704
+      ],
+      "id": "5bc4651e-2d82-413a-a7a0-c5577a53aaa3",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "k5NmH69V8Jgp3zBg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fe4b2ebe-734a-47d9-a077-f6d3fc5b74d1",
+              "leftValue": "={{ $json.body.tags[1] }}",
+              "rightValue": "CNI Portland VIP 3PM",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        608
+      ],
+      "id": "2af0929b-24dd-4308-8a43-d533ea1f36bb",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.consulexperience.com",
+            "user-agent": "System Webhooks",
+            "content-length": "1354",
+            "accept": "text/html, image/gif, image/jpeg, */*; q=0.2",
+            "accept-encoding": "gzip, br",
+            "cache-control": "no-cache",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "44.202.19.172",
+            "cf-ipcountry": "US",
+            "cf-ray": "989f0e6a8e14e625-IAD",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json; charset=UTF-8",
+            "pragma": "no-cache",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "172.71.190.154",
+            "x-forwarded-host": "n8n.consulexperience.com",
+            "x-forwarded-proto": "https",
+            "x-webhook-id": "wh_gdsmjg8mz",
+            "x-webhook-signature": "06f997e3309ba356a53e57b0012e92b46be9bf2286468beebbfa7971dbad8e92a89217256cabf4abb749027f0d59d7cc150fbd2d1bf6019baa9f751fd9721fd4",
+            "x-webhook-source": "consulexperience.simvoly.com",
+            "x-webhook-topic": "order_created"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "id": 379,
+            "contactId": 31954,
+            "memberId": 0,
+            "token": "7c2b66d5-d801-49c2-b193-373e91d7bca7",
+            "invoiceNo": 179,
+            "created": 1759689719,
+            "createdTimeFormatted": "10/05/2025 02:41 PM",
+            "customerName": "Gabriel",
+            "customerEmail": "gabriel@consulexperience.com",
+            "billingAddress": {
+              "name": "",
+              "phone": "+584243505430",
+              "companyName": "",
+              "companyId": "",
+              "vatId": "",
+              "country": "US",
+              "state": "",
+              "city": "",
+              "zipCode": "",
+              "address": "",
+              "address2": ""
+            },
+            "shippingAddress": {
+              "name": "",
+              "phone": "+584243505430",
+              "companyName": "",
+              "companyId": "",
+              "vatId": "",
+              "country": "US",
+              "state": "",
+              "city": "",
+              "zipCode": "",
+              "address": "",
+              "address2": ""
+            },
+            "shippingRequired": false,
+            "weight": 0,
+            "weightUnit": "",
+            "subTotal": 0,
+            "total": 0,
+            "discountCode": null,
+            "discountType": null,
+            "transactionId": "",
+            "shippingAmount": 0,
+            "shippingName": "",
+            "paid": true,
+            "paymentMethod": "no-payment",
+            "status": "completed",
+            "discountAmount": 0,
+            "taxes": [],
+            "items": [
+              {
+                "id": 496,
+                "name": "Portland (1) Acceso VIP PRUEBAS",
+                "url": "protland-vip-copy",
+                "productId": 178,
+                "sku": "",
+                "quantity": 1,
+                "weight": 0,
+                "width": 0,
+                "height": 0,
+                "length": 0,
+                "total": 0,
+                "type": "service",
+                "shippingRequired": false,
+                "images": [
+                  "https://content.app-sources.com/s/23971644546168278/uploads/Eventos/mockup_vip-9093161.png"
+                ],
+                "variation": [],
+                "additions": []
+              }
+            ],
+            "tags": [
+              "PORTLAND CLIENTE VIP",
+              "CNI Portland VIP 3PM"
+            ],
+            "additionalFields": null,
+            "currency": "USD",
+            "fulfillment": null,
+            "notes": []
+          },
+          "webhookUrl": "https://n8n.consulexperience.com/webhook/VIPPORTLAND",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [],
+        [],
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "HTTPC",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTPC1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTPC": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTPC1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "DfJ2Aj193aPTVabu"
+  },
+  "versionId": "af245fc8-d11d-49eb-88bc-ec8a3dab9122",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "246531f51febe49725759c1fd3ecb02fd615652b704ac0ad3a799cc64a384453"
+  },
+  "id": "hq8V6Bpgo3o1XIpJ",
+  "tags": []
+}
